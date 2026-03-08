@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EIR Presentation — FTB Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0e0e0e;
+    --paper: #f5f0e8;
+    --accent: #c8392b;
+    --accent2: #2b5fc8;
+    --muted: #6b6560;
+    --rule: #d4cec4;
+    --highlight: #f0e6c8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    overflow: hidden;
+  }
+
+  /* NAV */
+  #nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 32px;
+    background: var(--ink);
+    border-bottom: 1px solid #222;
+  }
+
+  #nav-left {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: #555;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  #slide-counter {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.1em;
+  }
+
+  #nav-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #333;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-dot.active { background: var(--accent); transform: scale(1.4); }
+  .nav-dot.appendix { background: #2a2a2a; border: 1px solid #444; }
+  .nav-dot.appendix.active { background: var(--accent2); }
+
+  /* SLIDES */
+  #deck {
+    position: fixed;
+    top: 44px; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    transform: translateY(12px);
+    overflow-y: auto;
+  }
+
+  .slide.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+  }
+
+  /* ARROW CONTROLS */
+  #prev, #next {
+    position: fixed;
+    bottom: 28px;
+    z-index: 200;
+    background: none;
+    border: 1px solid #333;
+    color: #666;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 8px 16px;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+  }
+  #prev { left: 32px; }
+  #next { right: 32px; }
+  #prev:hover, #next:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ===================== SLIDE STYLES ===================== */
+
+  /* S1 — COVER */
+  .s1 {
+    background: var(--ink);
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+  }
+  .s1-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100%;
+    width: 100%;
+  }
+  .s1-left {
+    background: var(--paper);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 60px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .s1-left::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    border: 1px solid var(--rule);
+    opacity: 0.5;
+  }
+  .s1-left::after {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    border: 1px solid var(--rule);
+    opacity: 0.5;
+  }
+  .s1-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .s1-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+  .s1-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .s1-sub {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 360px;
+    border-top: 1px solid var(--rule);
+    padding-top: 20px;
+  }
+  .s1-right {
+    background: var(--ink);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 56px;
+    gap: 28px;
+  }
+  .s1-stat {
+    border-left: 2px solid var(--accent);
+    padding-left: 20px;
+  }
+  .s1-stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--paper);
+    line-height: 1;
+  }
+  .s1-stat-label {
+    font-size: 11px;
+    color: #777;
+    margin-top: 4px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+  }
+  .s1-toc {
+    margin-top: 20px;
+    border-top: 1px solid #222;
+    padding-top: 20px;
+  }
+  .s1-toc-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    font-size: 11px;
+    color: #555;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.06em;
+  }
+  .s1-toc-num { color: var(--accent); min-width: 20px; }
+
+  /* STANDARD SLIDE LAYOUT */
+  .s-standard {
+    background: var(--paper);
+    padding: 52px 72px 80px;
+  }
+  .slide-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .slide-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 3vw, 44px);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 36px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--rule);
+    max-width: 700px;
+  }
+  .slide-title em { font-style: italic; color: var(--accent); }
+
+  /* DARK SLIDE */
+  .s-dark {
+    background: var(--ink);
+    padding: 52px 72px 80px;
+  }
+  .s-dark .slide-eyebrow { color: var(--accent); }
+  .s-dark .slide-title { color: var(--paper); border-bottom-color: #333; }
+  .s-dark .body-text { color: #aaa; }
+  .s-dark .label { color: #555; }
+
+  /* TYPOGRAPHY */
+  .body-text {
+    font-size: 14px;
+    line-height: 1.75;
+    color: #333;
+    max-width: 680px;
+  }
+  .large-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(18px, 2vw, 26px);
+    line-height: 1.45;
+    color: var(--ink);
+    max-width: 720px;
+    margin-bottom: 28px;
+  }
+  .large-text em { font-style: italic; color: var(--accent); }
+  .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .assumption-tag {
+    display: inline-block;
+    background: var(--highlight);
+    border: 1px solid var(--rule);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    color: var(--muted);
+    border-radius: 2px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* GRID LAYOUTS */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px; }
+  .two-col-65 { display: grid; grid-template-columns: 1.8fr 1fr; gap: 48px; }
+
+  /* CARDS */
+  .card {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 24px 28px;
+    position: relative;
+  }
+  .card-dark {
+    background: #161616;
+    border: 1px solid #2a2a2a;
+    padding: 24px 28px;
+  }
+  .card-accent {
+    background: var(--accent);
+    padding: 24px 28px;
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+  .card-dark .card-title { color: var(--paper); }
+  .card-accent .card-title { color: white; }
+  .card-body { font-size: 13px; line-height: 1.65; color: #555; }
+  .card-dark .card-body { color: #888; }
+  .card-accent .card-body { color: rgba(255,255,255,0.85); }
+  .card-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .kill-card { border-left: 3px solid #555; opacity: 0.6; }
+  .live-card { border-left: 3px solid var(--accent); }
+  .future-card { border-left: 3px solid var(--accent2); }
+
+  /* METRIC BLOCKS */
+  .metric-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .metric-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .metric-num-dark { color: var(--paper); }
+  .metric-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .metric-label { font-size: 13px; color: #555; margin-top: 4px; }
+
+  /* TIMELINE */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+  .timeline-item:last-child { border-bottom: none; }
+  .t-week {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding-top: 2px;
+  }
+  .t-content { }
+  .t-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .t-body { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+  /* QUOTE BLOCK */
+  .quote-block {
+    border-left: 3px solid var(--accent);
+    padding: 16px 24px;
+    margin: 20px 0;
+    background: white;
+  }
+  .quote-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .quote-attr {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-top: 10px;
+  }
+
+  /* PILL */
+  .pill {
+    display: inline-block;
+    border: 1px solid var(--rule);
+    padding: 4px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-radius: 100px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+  }
+  .pill-red { border-color: var(--accent); color: var(--accent); }
+  .pill-blue { border-color: var(--accent2); color: var(--accent2); }
+
+  /* DIVIDER */
+  .divider { width: 40px; height: 2px; background: var(--accent); margin: 20px 0; }
+
+  /* TABLE */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .data-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0ebe0;
+    color: #333;
+    line-height: 1.5;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table .highlight-row td { background: var(--highlight); font-weight: 600; }
+
+  /* APPENDIX */
+  .s-appendix {
+    background: #0a0a0a;
+    padding: 52px 72px 80px;
+    border-top: 1px solid #1a1a1a;
+  }
+  .s-appendix .slide-title { color: #e8e8e8; border-bottom-color: #1e1e1e; }
+  .s-appendix .slide-eyebrow { color: var(--accent2); }
+  .s-appendix .body-text { color: #888; }
+  .app-section { margin-bottom: 28px; }
+  .app-section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #1e1e1e;
+  }
+  .app-body { font-size: 13px; line-height: 1.75; color: #777; max-width: 760px; }
+  .app-body strong { color: #bbb; font-weight: 600; }
+  .qa-item { margin-bottom: 20px; }
+  .qa-q {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ccc;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .qa-q::before {
+    content: 'Q';
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    background: var(--accent);
+    color: white;
+    padding: 2px 6px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .qa-a {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.7;
+    padding-left: 30px;
+  }
+
+  /* SCROLLBAR */
+  .slide::-webkit-scrollbar { width: 3px; }
+  .slide::-webkit-scrollbar-thumb { background: #333; }
+
+  /* ASSUMPTIONS LIST */
+  .assumption-item {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid #1a1a1a;
+    font-size: 12px;
+    align-items: start;
+  }
+  .ass-area { color: #555; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; }
+  .ass-statement { color: #888; line-height: 1.5; }
+  .ass-confidence {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+  .conf-high { background: #1a2e1a; color: #5a9a5a; }
+  .conf-med { background: #2e2a1a; color: #9a8a5a; }
+  .conf-low { background: #2e1a1a; color: #9a5a5a; }
+
+
+  /* PASSWORD GATE */
+  #gate {
+    position: fixed;
+    inset: 0;
+    background: #0e0e0e;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #gate-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    width: 320px;
+  }
+  #gate-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #444;
+  }
+  #gate-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: #f5f0e8;
+    line-height: 1.3;
+  }
+  #gate-title em { color: #c8392b; font-style: italic; }
+  #gate-divider {
+    width: 32px;
+    height: 2px;
+    background: #c8392b;
+  }
+  #gate-sub {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.6;
+    margin-top: -8px;
+  }
+  #gate-input {
+    width: 100%;
+    background: #161616;
+    border: 1px solid #2a2a2a;
+    color: #f5f0e8;
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    padding: 14px 16px;
+    outline: none;
+    letter-spacing: 0.08em;
+  }
+  #gate-input:focus { border-color: #444; }
+  #gate-input.error { border-color: #c8392b; animation: shake 0.3s ease; }
+  #gate-btn {
+    width: 100%;
+    background: #c8392b;
+    border: none;
+    color: white;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  #gate-btn:hover { background: #a82e22; }
+  #gate-error {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #c8392b;
+    letter-spacing: 0.1em;
+    display: none;
+    margin-top: -8px;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div id="gate-inner">
+    <div id="gate-eyebrow">FTB · EIR Case · 2026</div>
+    <div id="gate-title">Metabolic Risk<br>at the <em>Point of Decision.</em></div>
+    <div id="gate-divider"></div>
+    <div id="gate-sub">This document is confidential.<br>Enter the access code to continue.</div>
+    <input id="gate-input" type="password" placeholder="Access code" autocomplete="off" />
+    <div id="gate-error">Incorrect code. Try again.</div>
+    <button id="gate-btn">Enter →</button>
+  </div>
+</div>
+
+
+<div id="nav">
+  <div id="nav-left">FTB · EIR Case · 2026</div>
+  <div id="nav-dots"></div>
+  <div id="slide-counter">01 / 15</div>
+</div>
+
+<div id="deck">
+
+  <!-- =================== SLIDE 1: COVER =================== -->
+  <div class="slide active" data-index="0">
+    <div class="s1-inner">
+      <div class="s1-left">
+        <div class="s1-eyebrow">FTB · Entrepreneur in Residence · 2026</div>
+        <div class="s1-title">Prevention<br>is not a<br><em>product.</em><br>It's a habit.</div>
+        <div class="s1-sub">
+          A go-to-market strategy, leadership framework, and capital narrative for a metabolic risk POCT spin-off targeting Latin America's middle market.
+        </div>
+      </div>
+      <div class="s1-right">
+        <div class="s1-stat">
+          <div class="s1-stat-num">115M</div>
+          <div class="s1-stat-label">adults in MX at metabolic risk</div>
+        </div>
+        <div class="s1-stat">
+          <div class="s1-stat-num">TRL8</div>
+          <div class="s1-stat-label">validated, functional, ready to learn</div>
+        </div>
+        <div class="s1-stat">
+          <div class="s1-stat-num">30 min</div>
+          <div class="s1-stat-label">result, outside the lab</div>
+        </div>
+        <div class="s1-toc">
+          <div class="s1-toc-item"><span class="s1-toc-num">01</span> The Problem Worth Solving</div>
+          <div class="s1-toc-item"><span class="s1-toc-num">02</span> Market Decision + Kill List</div>
+          <div class="s1-toc-item"><span class="s1-toc-num">03</span> Go-to-Market Architecture</div>
+          <div class="s1-toc-item"><span class="s1-toc-num">04</span> Unit Economics</div>
+          <div class="s1-toc-item"><span class="s1-toc-num">05</span> Leading Through Friction</div>
+          <div class="s1-toc-item"><span class="s1-toc-num">06</span> 90-Day Sprint</div>
+          <div class="s1-toc-item"><span class="s1-toc-num">07</span> Capital Strategy</div>
+          <div class="s1-toc-item"><span class="s1-toc-num">08</span> The Longer Arc</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== SLIDE 2: PROBLEM =================== -->
+  <div class="slide" data-index="1">
+    <div class="s-standard" style="height:100%;">
+      <div class="slide-eyebrow">01 — The Problem Worth Solving</div>
+      <div class="slide-title">Millions of people in Latin America are metabolically at risk.<br><em>Most don't know it.</em></div>
+      <div class="two-col-65">
+        <div>
+          <p class="large-text">The gap isn't the technology. It's the <em>pathway</em> — no one has built the habit of metabolic self-awareness into places where people actually go.</p>
+          <p class="body-text">Diabetes, hypertension, and dyslipidemia are Mexico's leading chronic disease burden. Combined, they account for over 35% of national mortality. The detection infrastructure today requires a central lab, a doctor's referral, a 12-hour fast, and results in 48 hours. For middle-market Mexico, every one of those steps is a reason to defer.</p>
+          <div class="divider"></div>
+          <p class="body-text">This isn't a clinical problem. It's a <strong>behavioral access problem</strong> wearing a clinical mask. The question isn't "how do we build a better test?" — it's "how do we make knowing your metabolic risk as normal as checking your blood pressure at a pharmacy?"</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div class="card">
+            <div class="card-tag label">The detection gap</div>
+            <div class="metric-num">1 in 3</div>
+            <div class="metric-label" style="color:#555;font-size:13px;margin-top:6px;">adults with Type 2 Diabetes in MX are undiagnosed at time of complication</div>
+          </div>
+          <div class="card" style="background:var(--highlight);">
+            <div class="card-tag label">The access gap</div>
+            <div class="metric-num">4–5</div>
+            <div class="metric-label" style="color:#555;font-size:13px;margin-top:6px;">friction steps between suspicion and a result under today's lab model</div>
+          </div>
+          <div class="card">
+            <div class="card-tag label">The opportunity</div>
+            <div class="metric-num">30 min</div>
+            <div class="metric-label" style="color:#555;font-size:13px;margin-top:6px;">is all it takes to collapse that entire pathway — if we place the test where people already are</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== SLIDE 3: TECHNOLOGY =================== -->
+  <div class="slide" data-index="2">
+    <div class="s-standard" style="height:100%;">
+      <div class="slide-eyebrow">02 — The Technology</div>
+      <div class="slide-title">What the case says.<br><em>What I'm adding to make it work.</em></div>
+      <div class="two-col" style="align-items:start;">
+        <div>
+          <div style="color:#999;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:16px;">From the case</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;gap:14px;align-items:start;">
+              <div style="width:3px;min-height:48px;background:var(--ink);flex-shrink:0;margin-top:3px;"></div>
+              <div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--ink);margin-bottom:3px;">TRL 8</div>
+                <div style="font-size:13px;color:var(--muted);">Functional prototype, lab-validated</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:start;">
+              <div style="width:3px;min-height:48px;background:var(--ink);flex-shrink:0;margin-top:3px;"></div>
+              <div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--ink);margin-bottom:3px;">~200 patients</div>
+                <div style="font-size:13px;color:var(--muted);">Promising initial clinical results</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:start;">
+              <div style="width:3px;min-height:48px;background:var(--ink);flex-shrink:0;margin-top:3px;"></div>
+              <div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--ink);margin-bottom:3px;">≤30 min</div>
+                <div style="font-size:13px;color:var(--muted);">Outside central labs, at point of care</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:start;">
+              <div style="width:3px;min-height:48px;background:var(--ink);flex-shrink:0;margin-top:3px;"></div>
+              <div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--ink);margin-bottom:3px;">Honest stage</div>
+                <div style="font-size:13px;color:var(--muted);">No commercial deployment. No real-world adoption evidence yet. That's the work ahead.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="background:var(--highlight);border:1px solid var(--rule);padding:24px;">
+            <div style="color:var(--accent);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:6px;">Working Assumptions</div>
+            <div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:20px;">Declared for this case solution — not stated in the brief.</div>
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div style="display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:start;">
+                <div style="font-family:'DM Mono',monospace;font-size:10px;font-weight:600;color:var(--ink);">Biomarkers —</div>
+                <div style="font-size:13px;color:#555;line-height:1.6;">HbA1c now · CRP in ~4–6 months. Deliberate sequence driven by validation readiness, not a gap.</div>
+              </div>
+              <div style="display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:start;">
+                <div style="font-family:'DM Mono',monospace;font-size:10px;font-weight:600;color:var(--ink);">Format —</div>
+                <div style="font-size:13px;color:#555;line-height:1.6;">Fluorescent lateral flow assay. Enables quantitative output vs. colloidal gold visual read.</div>
+              </div>
+              <div style="display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:start;">
+                <div style="font-family:'DM Mono',monospace;font-size:10px;font-weight:600;color:var(--ink);">Reader —</div>
+                <div style="font-size:13px;color:#555;line-height:1.6;">Dedicated portable reader with connectivity. Standardizes measurement, ensures real-time data capture. Smartphone reading rejected for pilot — clean defensible data over cost savings.</div>
+              </div>
+              <div style="display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:start;">
+                <div style="font-family:'DM Mono',monospace;font-size:10px;font-weight:600;color:var(--ink);">Comparator —</div>
+                <div style="font-size:13px;color:#555;line-height:1.6;">ELISA as gold standard for clinical validation — required by COFEPRIS / ANVISA for IVD clearance. We're the access layer that routes people toward it when the flag says they need it.</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:14px;padding:14px 18px;border-left:3px solid var(--muted);background:transparent;">
+            <p style="font-size:12px;color:var(--muted);font-style:italic;line-height:1.65;">If the actual format differs, the commercial logic holds — the quantitative output is what justifies the reader and the data asset. That chain has to be intact.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== SLIDE 4: MARKET DECISION =================== -->
+  <div class="slide" data-index="3">
+    <div class="s-standard" style="height:100%;">
+      <div class="slide-eyebrow">03 — Market Decision</div>
+      <div class="slide-title">Three segments considered.<br><em>One bet. Two explicit kills.</em></div>
+      <div class="three-col">
+        <div class="card live-card">
+          <div class="card-tag" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">Primary bet — Now</div>
+          <div class="card-title">Health Membership Channel</div>
+          <p class="card-body">TuDoc-type memberships and primary care clinic networks. Middle-market Mexico, adults 30–55, with a care pathway already built in. Fastest path to real behavioral data — not just test volume.</p>
+          <div style="margin-top:16px;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Why it wins</div>
+            <div style="font-size:12px;color:#555;line-height:1.6;">No hospital procurement cycle. Patient already has a follow-up pathway built in. Every result has somewhere to go — that's the thing most point-of-care deployments are missing. Channel partner gets a differentiated member benefit; we get distribution and a closed behavioral loop we can actually measure.</div>
+          </div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--rule);">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Honest risk</div>
+            <div style="font-size:12px;color:#888;">Margins are thin at pilot volume. Reader placement subsidy eats COGS. Channel partners will want margin. We model for this explicitly — pilot stage is intentionally near-zero margin.</div>
+          </div>
+        </div>
+        <div class="card future-card">
+          <div class="card-tag" style="color:var(--accent2);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">Second market — Month 9–18</div>
+          <div class="card-title">Digital Insurers + Managed Care</div>
+          <p class="card-body">Sofía and similar digital health insurers first — loss ratio improves when members stay healthy, and actuarial data is something they can't get elsewhere today. Then Keralty, Sanitas, and integrated managed care networks where the capitated structure makes early detection a direct cost-avoidance story.</p>
+          <div style="margin-top:16px;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Why we wait</div>
+            <div style="font-size:12px;color:#555;line-height:1.6;">We need 500+ real-world cases before this conversation is credible. When we have them, this channel gives us institutional legitimacy and feeds directly into insurer risk model integration.</div>
+          </div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--rule);">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Existing relationships</div>
+            <div style="font-size:12px;color:#888;">Direct experience building GTM inside a leading digital health insurer in Mexico gives us a non-zero head start on this conversation when the time comes.</div>
+          </div>
+        </div>
+        <div class="card kill-card">
+          <div class="card-tag" style="color:#666;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">Explicit kill — For now</div>
+          <div class="card-title" style="color:#888;">Private Hospitals / Clinic Networks</div>
+          <p class="card-body" style="color:#888;">High theoretical TAM. Near-zero practical accessibility at this stage.</p>
+          <div style="margin-top:16px;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#555;margin-bottom:8px;">Why we kill it</div>
+            <div style="font-size:12px;color:#777;line-height:1.6;">Hospital procurement committees require a clinical evidence package we don't yet have. 6-month cycles to reach "maybe." Without peer-reviewed data or regulatory clearance, willingness to adopt an external unvalidated tool is near zero — regardless of the budget line. This isn't about the segment's value. It's about what we can actually convert.</div>
+          </div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid #ddd;">
+            <div style="font-size:12px;color:#aaa;font-style:italic;">Knowing what not to do — and saying it out loud — is the first test of market judgment.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== SLIDE 5: GTM MODEL =================== -->
+  <div class="slide" data-index="4">
+    <div class="s-standard" style="height:100%;">
+      <div class="slide-eyebrow">04 — Go-to-Market Architecture</div>
+      <div class="slide-title">We go to the first partner conversation<br>with a <em>pilot design and four questions.</em></div>
+      <div class="two-col" style="align-items:start;">
+        <div>
+          <div style="margin-bottom:28px;">
+            <div class="label" style="margin-bottom:16px;">Two partners that matter at this stage</div>
+            <div class="card" style="margin-bottom:14px;border-left:3px solid #2e7d32;">
+              <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+                <div class="card-title">TuDoc</div>
+                <span class="pill" style="background:#e8f5e9;color:#2e7d32;border:none;">Primary pilot</span>
+              </div>
+              <p class="card-body">15 locations · ~20k active members · closed behavioral loop. Every test result connects directly to a teleconsult deep-link. That's the thing most point-of-care plays are missing — the result goes somewhere. With TuDoc, it does.</p>
+            </div>
+            <div class="card" style="border-left:3px solid var(--accent);">
+              <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+                <div class="card-title">Sofía</div>
+                <span class="pill pill-red">Strategic — Series A activation</span>
+              </div>
+              <p class="card-body">Digital insurer. Three-role relationship: distribution channel, payer/subsidy partner, and data buyer for actuarial intelligence. Their loss ratio improves when members stay healthy. The metabolic risk data we generate is something they can't get anywhere else today — that's what makes this a Series A activation partner, not just a pilot participant.</p>
+            </div>
+            <div style="margin-top:12px;padding:10px 14px;background:var(--highlight);border:1px solid var(--rule);font-size:12px;color:var(--muted);line-height:1.6;">
+              <strong style="color:var(--ink);">Pharmacy chains</strong> (Farmacias del Ahorro, Walmart Farmacia) as distribution layer in parallel — volume and awareness only. Data trail ends at the door. Not the validation instrument.
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="label" style="margin-bottom:16px;">Four learning questions for the pilot</div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="t-week">LQ — 01</div>
+              <div class="t-content"><div class="t-title">Does the channel pull demand on its own?</div><div class="t-body">Metric: walk-in test rate vs. referred/pulled-through rate</div></div>
+            </div>
+            <div class="timeline-item">
+              <div class="t-week">LQ — 02</div>
+              <div class="t-content"><div class="t-title">What does the patient do with the result?</div><div class="t-body">Metric: % who follow up with a provider within 14 days</div></div>
+            </div>
+            <div class="timeline-item">
+              <div class="t-week">LQ — 03</div>
+              <div class="t-content"><div class="t-title">What's the real cost-to-serve per test in field conditions?</div><div class="t-body">Metric: actual COGS + time + overhead vs. model</div></div>
+            </div>
+            <div class="timeline-item">
+              <div class="t-week">LQ — 04</div>
+              <div class="t-content"><div class="t-title">Would the channel partner renew and expand?</div><div class="t-body">Metric: NPS from partner, renewal intent at week 10</div></div>
+            </div>
+          </div>
+          <div class="card-accent" style="margin-top:20px;">
+            <div class="card-tag" style="color:rgba(255,255,255,0.6);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px;">Pre-B2B pipeline</div>
+            <p style="color:white;font-size:13px;line-height:1.65;">Sofía relationship active in parallel. Not funded, not resourced yet — but the conversation is open. LOI-stage target: month 9, before the round closes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== SLIDE 6: UNIT ECONOMICS =================== -->
+  <div class="slide" data-index="5">
+    <div class="s-standard" style="height:100%;">
+      <div class="slide-eyebrow">05 — Unit Economics</div>
+      <div class="slide-title">Honest numbers.<br><em>Declared assumptions.</em></div>
+      <div class="two-col" style="align-items:start;">
+        <div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Pilot Stage</th>
+                <th>Scale (50k+ tests)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Test strip COGS <span class="assumption-tag">assumed</span></td><td>$4–6 USD</td><td>$1.50–2.50 USD</td></tr>
+              <tr><td>Reader placement (amortized)</td><td>$2–3 USD/test</td><td>$0.30–0.60 USD</td></tr>
+              <tr><td>Field ops cost/test <span class="assumption-tag">assumed</span></td><td>$1.50–2 USD</td><td>$0.50–0.80 USD</td></tr>
+              <tr class="highlight-row"><td>Total cost-to-serve</td><td>$7.50–11 USD</td><td>$2.30–3.90 USD</td></tr>
+              <tr><td>B2B price to channel</td><td>$3–5 USD</td><td>$5–8 USD</td></tr>
+              <tr><td>End-user price (MXN equiv)</td><td>$7–12 USD</td><td>$10–15 USD</td></tr>
+              <tr class="highlight-row"><td>Gross margin at pilot</td><td style="color:var(--accent);">Near zero / negative</td><td style="color:green;">40–55%</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:20px;padding:16px;background:var(--highlight);border:1px solid var(--rule);">
+            <div class="label" style="margin-bottom:8px;">Why near-zero margin is the right call at pilot</div>
+            <p style="font-size:12px;color:#555;line-height:1.6;">We are buying real-world clinical data, channel behavior data, and patient follow-through data. That's the asset we're building. Margin optimization before we have 500 patient records is premature. The investors who understand this are the right investors.</p>
+          </div>
+        </div>
+        <div>
+          <div style="margin-bottom:24px;">
+            <div class="label" style="margin-bottom:12px;">Revenue model options by channel</div>
+            <div class="card" style="margin-bottom:10px;">
+              <div class="card-tag" style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Pharmacy distribution layer (volume only)</div>
+              <div style="font-size:13px;color:#333;">Per-test revenue share. Reader placed free (CAPEX). Volume commitment in exchange for exclusivity in pilot geography.</div>
+            </div>
+            <div class="card" style="margin-bottom:10px;">
+              <div class="card-tag" style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Health membership (TuDoc tier)</div>
+              <div style="font-size:13px;color:#333;">Bundled B2B volume price. Predictable revenue per member enrolled. Test cost absorbed in membership fee.</div>
+            </div>
+            <div class="card">
+              <div class="card-tag" style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Future: Sofía / managed care</div>
+              <div style="font-size:13px;color:#333;">Cost-avoidance framing. Price per test positioned against cost of late-stage metabolic complication management. Different and stronger economic logic.</div>
+            </div>
+          </div>
+          <div>
+            <div class="label" style="margin-bottom:12px;">Path to positive unit economics</div>
+            <p style="font-size:13px;color:#555;line-height:1.7;">Break-even on a per-test basis requires two things: CDMO relationship at medium volume (50k+ units) and reader amortization over 18+ months of placement. Both are achievable within the seed round runway if pilots start in month 3. <span class="assumption-tag">assumed</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== SLIDE 7: LEADERSHIP =================== -->
+  <div class="slide" data-index="6">
+    <div class="s-dark" style="height:100%;">
+      <div class="slide-eyebrow">06 — Leading Through Friction</div>
+      <div class="slide-title">The hardest moment isn't the<br><em>strategy. It's the room.</em></div>
+      <div class="two-col-65" style="align-items:start;">
+        <div>
+          <div style="background:#111;border:1px solid #1e1e1e;padding:20px;margin-bottom:24px;">
+            <div style="color:var(--accent);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:12px;">The scenario</div>
+            <p style="color:#aaa;font-size:14px;line-height:1.75;margin-bottom:10px;">CTO wants to launch with both biomarkers. The science is 70% there. My call: <strong style="color:white;">go with HbA1c now. CRP is version 1.1.</strong></p>
+            <p style="color:#666;font-size:13px;font-style:italic;line-height:1.6;">Not a product decision. A learning strategy decision.</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <div>
+              <div style="color:#666;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:12px;">Before</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;gap:12px;align-items:start;"><div style="width:3px;min-height:36px;background:#555;flex-shrink:0;margin-top:3px;"></div><p style="color:#888;font-size:13px;line-height:1.6;">1:1 with the CTO before the group session. Concern heard in full. No ambush in the room.</p></div>
+              </div>
+            </div>
+            <div>
+              <div style="color:#ccc;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:12px;">During</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;gap:12px;align-items:start;"><div style="width:3px;min-height:36px;background:#aaa;flex-shrink:0;margin-top:3px;"></div><p style="color:#aaa;font-size:13px;line-height:1.6;">Named the disagreement openly — didn't bury it. Sequencing logic explained: this is a learning call, not a product call.</p></div>
+                <div style="display:flex;gap:12px;align-items:start;"><div style="width:3px;min-height:36px;background:#aaa;flex-shrink:0;margin-top:3px;"></div><p style="color:#aaa;font-size:13px;line-height:1.6;">CTO keeps ownership of the post-pilot biomarker roadmap.</p></div>
+                <div style="display:flex;gap:12px;align-items:start;"><div style="width:3px;min-height:36px;background:#aaa;flex-shrink:0;margin-top:3px;"></div><p style="color:#aaa;font-size:13px;line-height:1.6;">COO raises mid-pilot reintegration risk — strips, firmware, retraining, CRP backend.</p></div>
+              </div>
+            </div>
+            <div>
+              <div style="color:var(--accent);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:12px;">After</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;gap:12px;align-items:start;"><div style="width:3px;min-height:36px;background:var(--accent);flex-shrink:0;margin-top:3px;"></div><p style="color:#ddd;font-size:13px;line-height:1.6;">Worked through each with the COO: OTA firmware (no field pause), negligible restock cost, training designable, backend owned personally.</p></div>
+                <div style="display:flex;gap:12px;align-items:start;"><div style="width:3px;min-height:36px;background:var(--accent);flex-shrink:0;margin-top:3px;"></div><p style="color:#ddd;font-size:13px;line-height:1.6;">COO now designing full rollout architecture in parallel — one condition: pilot integrity stays intact.</p></div>
+                <div style="display:flex;gap:12px;align-items:start;"><div style="width:3px;min-height:36px;background:var(--accent);flex-shrink:0;margin-top:3px;"></div><p style="color:#ddd;font-size:13px;line-height:1.6;">When the pilot closes, expansion is already blueprinted. CTO's disagreement on sequencing: on record and respected.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div style="background:var(--accent);padding:24px;">
+            <div style="color:rgba(255,255,255,0.6);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">The principle</div>
+            <p style="color:white;font-size:15px;line-height:1.6;font-family:'Playfair Display',serif;font-style:italic;">"Committed execution with unresolved disagreement is not a failure of alignment. It's what early-stage actually looks like."</p>
+          </div>
+          <div class="card-dark" style="border-left:2px solid #2e7d32;">
+            <div style="color:#555;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">The COO flip</div>
+            <p style="color:#888;font-size:13px;line-height:1.65;">The COO raised the right concern. Working through it together converted operational friction into a parallel workstream. When the pilot closes, scale isn't a new project — it's already designed. That's what good friction looks like.</p>
+          </div>
+          <div class="card-dark">
+            <div style="color:#555;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">What I'm not asking for</div>
+            <p style="color:#888;font-size:13px;line-height:1.65;">Consensus. I'm asking for commitment. Those are different things — and conflating them is how early-stage teams stall.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== SLIDE 8: 90-DAY SPRINT =================== -->
+  <div class="slide" data-index="7">
+    <div class="s-standard" style="height:100%;">
+      <div class="slide-eyebrow">07 — Validation Sprint</div>
+      <div class="slide-title">90 days to learn what<br><em>no model can tell us.</em></div>
+      <div class="two-col" style="align-items:start;">
+        <div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="t-week">W1–4</div>
+              <div class="t-content">
+                <div class="t-title">Channel activation + demand seeding</div>
+                <div class="t-body">Negotiate pilot agreement with 2 locations — both health membership or primary care clinic model. Ethics oversight document finalized. RA consultant engaged. Test kit inventory confirmed. Waitlist target: 200+ pre-registrations before the first test runs.</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="t-week">W5–8</div>
+              <div class="t-content">
+                <div class="t-title">First 150 patient tests</div>
+                <div class="t-body">Live pilot ops. Daily 15-min ops standup. Track: cost-to-serve actual vs. model, patient experience (NPS), follow-through rate to care, pull-through vs. organic traffic ratio. Document everything for COFEPRIS paper trail.</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="t-week">W9–12</div>
+              <div class="t-content">
+                <div class="t-title">Data review + go/no-go on scale</div>
+                <div class="t-body">Review all four learning questions. Partner renewal conversation. Begin managed care outreach (Sofía expansion, institutional payers) with real-world data in hand. Investor update with pilot results — not projections.</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:24px;padding:20px;background:var(--highlight);border:1px solid var(--rule);">
+            <div class="label" style="margin-bottom:8px;">Decision gate at week 12</div>
+            <p style="font-size:13px;color:#555;line-height:1.6;">If LQ1–4 show positive signals on ≥3 of 4 dimensions: scale to 5 sites, activate Sofía institutional conversation, begin Series A narrative construction. If not: diagnose which assumption failed, adjust model, extend pilot before scaling.</p>
+          </div>
+        </div>
+        <div>
+          <div class="label" style="margin-bottom:16px;">The 6 metrics that matter in 90 days</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="card">
+                <div class="metric-num" style="font-size:28px;">≥150</div>
+                <div class="metric-unit">tests</div>
+                <div class="metric-label">administered across 2 sites</div>
+              </div>
+              <div class="card">
+                <div class="metric-num" style="font-size:28px;">≤30</div>
+                <div class="metric-unit">min</div>
+                <div class="metric-label">time-per-patient in field</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="card">
+                <div class="metric-num" style="font-size:28px;">&gt;40%</div>
+                <div class="metric-unit">follow-through</div>
+                <div class="metric-label">patients who act on result</div>
+              </div>
+              <div class="card">
+                <div class="metric-num" style="font-size:28px;">&gt;30%</div>
+                <div class="metric-unit">pull-through</div>
+                <div class="metric-label">traffic driven by our demand seeding</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="card">
+                <div class="metric-num" style="font-size:28px;">≥7</div>
+                <div class="metric-unit">NPS</div>
+                <div class="metric-label">channel partner score (0–10)</div>
+              </div>
+              <div class="card">
+                <div class="metric-num" style="font-size:28px;">&lt;$12</div>
+                <div class="metric-unit">USD CTS</div>
+                <div class="metric-label">actual cost-to-serve per test</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:14px;">
+            <p style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.06em;">All targets declared as assumptions. Real benchmarks set at week 4 once first ops data is in.</p>
+          </div>
+          <div style="margin-top:14px;padding:14px 16px;background:#f7f7f0;border-left:3px solid var(--ink);">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#333;margin-bottom:6px;">Why partner selection determines measurability</div>
+            <p style="font-size:12px;color:#555;line-height:1.6;margin-bottom:6px;">Tests administered is a vanity metric. Outcomes acted on is the signal. Only a partner with a closed care pathway — TuDoc's teleconsult layer or Sofía's claims data — can give us the behavioral follow-through rate. A pure pharmacy hands the patient a paper result and the data trail ends at the door.</p>
+            <p style="font-size:12px;color:#888;line-height:1.6;font-style:italic;">Data shared back to us as anonymized aggregated signals under partnership agreement — no individual PHI required to validate the behavioral hypothesis, and no LFPDPPP/LGPD exposure.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== SLIDE 9: CAPITAL STRATEGY =================== -->
+  <div class="slide" data-index="8">
+    <div class="s-dark" style="height:100%;">
+      <div class="slide-eyebrow">08 — Capital Strategy</div>
+      <div class="slide-title">We're not closing a round.<br><em>We're starting a long race.</em></div>
+      <div class="two-col" style="align-items:start;">
+        <div>
+          <p style="color:#aaa;font-size:14px;line-height:1.75;margin-bottom:24px;">Fundraising at this stage is about finding the right people, not closing the fastest check. The goal of every investor conversation in the next 6 months is to find 3 to 5 people who understand healthcare cycles, believe in the thesis, and are willing to bet on the team before the metrics exist.</p>
+          <div style="margin-bottom:24px;">
+            <div style="color:#555;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:16px;">Seed round parameters <span class="assumption-tag" style="color:#555;background:#1a1a1a;border-color:#333;">assumed</span></div>
+            <table class="data-table" style="border:1px solid #1e1e1e;">
+              <tbody>
+                <tr><td style="color:#666;font-size:12px;">Target raise</td><td style="color:#aaa;font-weight:600;">$500k – $1.5M USD</td></tr>
+                <tr><td style="color:#666;font-size:12px;">Allocation</td><td style="color:#aaa;">Pilot ops 40% · CDMO 25% · Reader CAPEX 10% · Regulatory/RA 10% · Team 15% · At $2M: CRP validation + Brazil commercial entry funded within same round</td></tr>
+                <tr><td style="color:#666;font-size:12px;">Runway target</td><td style="color:#aaa;">18 months to Series A narrative</td></tr>
+                <tr><td style="color:#666;font-size:12px;">Series A trigger</td><td style="color:#aaa;">500+ real-world cases · 2+ partners renewed · ANVISA or COFEPRIS path documented</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="background:#0d1a0d;border:1px solid #1a2e1a;padding:16px;margin-bottom:20px;">
+            <div style="color:#3a6a3a;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px;">Regulatory as a fundraising asset</div>
+            <p style="color:#5a8a5a;font-size:12px;line-height:1.6;">The ANVISA–COFEPRIS abbreviated pathway (August 2025 MOU) creates a concrete two-market strategy: Brazil clearance first → COFEPRIS in 30 business days. A Brazil-native investor isn't writing a check for Mexico only — they're writing a check for a company that enters their home market as part of the same motion. That's a structurally different conversation than "we'll expand to Brazil later."</p>
+          </div>
+          <div>
+            <div style="color:#555;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:16px;">The honest narrative</div>
+            <div class="quote-block" style="background:#111;border-left-color:var(--accent);">
+              <div class="quote-text" style="color:#aaa;">"We are not looking for capital to prove the technology works. We are looking for capital and partners to prove the market works."</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="margin-bottom:20px;">
+            <div style="color:#555;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:14px;">Right investor profile</div>
+            <div class="card-dark" style="margin-bottom:10px;border-left:2px solid #2ecc71;">
+              <p style="color:#aaa;font-size:13px;line-height:1.6;"><strong style="color:#ccc;">Healthcare-native Seed funds</strong> — Portfolio companies with similar go-to-market complexity in emerging markets. They know month 18 with 500 patient records is actually good.</p>
+            </div>
+            <div class="card-dark" style="margin-bottom:10px;border-left:2px solid #2ecc71;">
+              <p style="color:#aaa;font-size:13px;line-height:1.6;"><strong style="color:#ccc;">LATAM-native healthcare investors</strong> — Specifically: Brazil-based funds with clinical or health system background. The ANVISA–COFEPRIS bridge means they're not betting on a foreign market. They're anchoring in Brazil first, with Mexico as the 30-day follow-on. That's a home-market story, not an international bet.</p>
+            </div>
+            <div class="card-dark" style="margin-bottom:10px;border-left:2px solid #2ecc71;">
+              <p style="color:#aaa;font-size:13px;line-height:1.6;"><strong style="color:#ccc;">Operators-turned-investors in health</strong> — People who've built inside the system. They won't panic at "regulatory in parallel."</p>
+            </div>
+            <div class="card-dark" style="border-left:2px solid #2ecc71;">
+              <p style="color:#aaa;font-size:13px;line-height:1.6;"><strong style="color:#ccc;">Strategic angels with channel access</strong> — A former Keralty exec, a pharmacy chain operator, a TuDoc-adjacent founder. Not for check size — for doors and credibility signals.</p>
+            </div>
+          </div>
+          <div>
+            <div style="color:#555;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:14px;">Wrong investor profile — say it explicitly</div>
+            <div class="card-dark" style="margin-bottom:10px;border-left:2px solid var(--accent);">
+              <p style="color:#777;font-size:13px;line-height:1.6;"><strong style="color:#999;">Return optimizers with sub-5 year horizon.</strong> POCT diagnostics in LATAM is a 7–10 year build. Board pressure at month 18 for revenue we structurally can't have yet is company-breaking.</p>
+            </div>
+            <div class="card-dark" style="border-left:2px solid var(--accent);">
+              <p style="color:#777;font-size:13px;line-height:1.6;"><strong style="color:#999;">Consumer health generalists</strong> who don't understand regulated diagnostics cycles. They'll misread pilot losses as execution failure instead of deliberate learning investment.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== SLIDE 10: LONGER ARC =================== -->
+  <div class="slide" data-index="9">
+    <div class="s-standard" style="height:100%;">
+      <div class="slide-eyebrow">09 — The Longer Arc</div>
+      <div class="slide-title">This starts as a diagnostic company.<br><em>The real asset is what we build underneath it.</em></div>
+      <div class="two-col-65" style="align-items:start;">
+        <div>
+          <p class="large-text">Every test administered generates a data point. 500 becomes a dataset. 50,000 becomes <em>infrastructure</em>.</p>
+          <p class="body-text" style="margin-bottom:24px;">Metabolic risk data at the population level — segmented by geography, age, income band, and health access pattern — is something that doesn't exist today for Mexico's middle market. Not because it's impossible to generate, but because no one has designed the distribution layer that reaches that population at scale.</p>
+          <p class="body-text" style="margin-bottom:24px;">If we execute the pharmacy + membership model well, we become the first entity with a real-world metabolic risk dataset for that cohort. That dataset has downstream uses that go well beyond diagnostics: insurer risk stratification models, preventive program design, pharmaceutical targeting, and eventually health data infrastructure that operates at a different valuation multiple than a device company.</p>
+          <div class="quote-block">
+            <div class="quote-text">"We won't build this now. But we will design every pilot, every patient interaction, and every data collection decision with this future in mind."</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div style="text-align:center;padding:32px 24px;background:var(--ink);color:white;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:#555;margin-bottom:16px;">Value layers over time</div>
+            <div style="display:flex;flex-direction:column;gap:12px;text-align:left;">
+              <div style="padding:14px;border-left:2px solid var(--accent);background:#111;">
+                <div style="font-family:'DM Mono',monospace;font-size:9px;color:#555;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Year 1–2</div>
+                <div style="color:#ddd;font-size:13px;">Diagnostic device company. Revenue per test. Channel partnerships. Clinical evidence base.</div>
+              </div>
+              <div style="padding:14px;border-left:2px solid var(--accent2);background:#111;">
+                <div style="font-family:'DM Mono',monospace;font-size:9px;color:#555;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Year 2–4</div>
+                <div style="color:#ddd;font-size:13px;">Preventive program infrastructure. Managed care integration. Cost-avoidance narrative for insurers.</div>
+              </div>
+              <div style="padding:14px;border-left:2px solid #888;background:#111;">
+                <div style="font-family:'DM Mono',monospace;font-size:9px;color:#555;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Year 4+</div>
+                <div style="color:#aaa;font-size:13px;font-style:italic;">Health data infrastructure play. Risk model input. Different economics, different investors, different ceiling.</div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="background:var(--highlight);">
+            <div class="card-tag" style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">We won't over-promise this</div>
+            <p style="font-size:13px;color:#555;line-height:1.65;">The data infrastructure play is a hypothesis, not a plan. It earns the right to exist only if the diagnostic layer works. That's where all focus goes first.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== SLIDE 11: WHERE I COULD BE WRONG =================== -->
+  <div class="slide" data-index="10">
+    <div class="s-dark" style="height:100%;">
+      <div class="slide-eyebrow">10 — Where I Could Be Wrong</div>
+      <div class="slide-title">Every bet carries an assumption.<br><em>Here's where I could be mistaken.</em></div>
+      <div class="two-col-65" style="align-items:start;">
+        <div>
+          <p style="color:#666;font-size:14px;line-height:1.75;margin-bottom:28px;">Naming these early is the only way to manage them. Pretending they don't exist just means someone else surfaces them first.</p>
+          <div style="display:flex;flex-direction:column;gap:0;">
+            <div style="padding:20px 0;border-bottom:1px solid #1e1e1e;">
+              <div style="color:var(--accent);font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:8px;">The behavioral hypothesis is wrong.</div>
+              <p style="color:#666;font-size:13px;line-height:1.7;">Patients get a quantitative result and don't act on it. If &lt;10% book a follow-up within 14 days across both pilot sites, the access problem isn't what I think it is. We'd be building a curiosity tool, not a health intervention.</p>
+            </div>
+            <div style="padding:20px 0;border-bottom:1px solid #1e1e1e;">
+              <div style="color:var(--accent);font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:8px;">TuDoc isn't the right closed loop.</div>
+              <p style="color:#666;font-size:13px;line-height:1.7;">20k members is a benchmark assumption. If their conversion from test to teleconsult is structurally blocked — by plan design, physician availability, or patient inertia — the pilot gives us data but no repeatable model.</p>
+            </div>
+            <div style="padding:20px 0;border-bottom:1px solid #1e1e1e;">
+              <div style="color:var(--accent);font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:8px;">Unit economics don't survive the channel.</div>
+              <p style="color:#666;font-size:13px;line-height:1.7;">Partner margin requirements + reader CAPEX + COGS at pilot volume may make the $7–12 price point untenable without subsidy. If Sofía or TuDoc won't absorb it, we need a different payer structure before Series A.</p>
+            </div>
+            <div style="padding:20px 0;">
+              <div style="color:var(--accent);font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:8px;">ANVISA Class III classification kills the regulatory shortcut.</div>
+              <p style="color:#666;font-size:13px;line-height:1.7;">The Brazil-first pathway depends on Class II Notificação. If the product gets classified as Class III, the 9–12 month dual-market timeline collapses. Week-one RA consultant call is non-negotiable.</p>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card-dark">
+            <div style="color:#555;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">What I do about each</div>
+            <p style="color:#888;font-size:13px;line-height:1.65;">Each of these has a specific 90-day check built into the validation sprint. The pilot isn't just about proving the product works. It's about finding out which of these assumptions is wrong before we scale.</p>
+          </div>
+          <div class="card-dark" style="border-left:2px solid #2e7d32;">
+            <div style="color:#555;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">The one I'm most confident about</div>
+            <p style="color:#888;font-size:13px;line-height:1.65;">The behavioral hypothesis. Not because I know it's right — but because the TuDoc model was specifically designed around it. If any environment can prove behavior change, it's a closed membership loop with a teleconsult built in.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== APPENDIX A: HOW POCT WORKS =================== -->
+
+  <!-- =================== APPENDIX A: HOW POCT WORKS =================== -->
+  <div class="slide" data-index="11">
+    <div class="s-appendix">
+      <div class="slide-eyebrow">Appendix A — Tech Reference</div>
+      <div class="slide-title">Technology reference.</div>
+      <div class="two-col" style="align-items:start;">
+        <div>
+          <div class="app-section">
+            <div class="app-section-title">How a lateral flow test works</div>
+            <p class="app-body">A lateral flow assay (LFA) is a paper-based platform that detects a target analyte in a sample. Blood, urine, or saliva is applied to a membrane and migrates via capillary action through: a conjugate pad (antibodies tagged with colored particles), a nitrocellulose membrane with test and control lines, and an absorbent pad. If the target molecule is present, it binds at the test line — producing a visible band. For quantitative metabolic results (not just positive/negative), a handheld reader interprets band intensity and converts it to a numerical value. That reader is the CAPEX element in our model.</p>
+          </div>
+          <div class="app-section">
+            <div class="app-section-title">What "metabolic risk detection" means here</div>
+            <p class="app-body">This test is a <strong>risk flagging tool, not a clinical diagnostic</strong>. Primary biomarkers: <strong>HbA1c</strong> (chronic glycemic exposure — 3-month average blood sugar) and <strong>CRP</strong> (C-reactive protein — systemic inflammation and metabolic syndrome signal). HbA1c is validated at current TRL. CRP is 4–6 months from validation — deliberate sequencing, not a gap. The key clinical distinction: a positive result says "elevated risk — see a physician." It does not say "you have metabolic syndrome." That framing is both clinically correct and legally necessary pre-clearance.</p>
+          </div>
+          <div class="app-section">
+            <div class="app-section-title">Sensitivity and specificity</div>
+            <p class="app-body"><strong>Sensitivity</strong>: correctly identifies people who have the risk condition (true positive rate). <strong>Specificity</strong>: correctly identifies people who don't (true negative rate). For a screening tool, sensitivity is prioritized — better to flag someone who turns out fine than miss someone who isn't. The ~200 patient validation likely shows preliminary numbers. Until formally published or COFEPRIS-reviewed, treat specific figures as internal data only — never cite them in public-facing patient materials.</p>
+          </div>
+          <div class="app-section">
+            <div class="app-section-title">TRL 8 — what it means and doesn't</div>
+            <p class="app-body"><strong>TRL 8 = "System complete and qualified."</strong> Prototype functions. Lab validation done. ~200 patient evaluations show promising results. What TRL8 does NOT mean: regulatory clearance, peer-reviewed publication, scale manufacturing readiness, or commercial viability evidence. It means the science works. Every other question is a company-building question — and that's what this role is about.</p>
+          </div>
+        </div>
+        <div>
+          <div class="app-section">
+            <div class="app-section-title">COFEPRIS regulatory landscape — 2026</div>
+            <p class="app-body">COFEPRIS regulates IVDs under the General Health Law. Lateral flow metabolic tests likely fall under <strong>Class II</strong> (moderate risk). Standard route: full technical dossier, clinical performance data, GMP evidence, Spanish labeling. Historical timeline: 12–24 months.<br><br><strong>Critical 2025 update:</strong> COFEPRIS published the Abbreviated Regulatory Pathway (effective September 1, 2025), recognizing prior approvals from IMDRF and MDSAP member authorities — including FDA, CE Mark (MDR/IVDR), ANVISA, Health Canada, TGA, and others. Target review timeline under abbreviated route: <strong>30 business days</strong>. That's a concrete acceleration lever if the device gets clearance in Brazil or the EU first.</p>
+          </div>
+          <div class="app-section">
+            <div class="app-section-title">The ANVISA–COFEPRIS MOU and what it actually means</div>
+            <p class="app-body">In August 2025, ANVISA and COFEPRIS signed a formal MOU establishing a framework for regulatory cooperation and reliance. <strong>No formal mutual recognition exists yet</strong> — but COFEPRIS now explicitly accepts ANVISA approvals as reference under the abbreviated pathway.<br><br>This opens a concrete two-market strategy: obtain ANVISA clearance in Brazil first (well-understood IVD process, LATAM's largest diagnostic market), then use ANVISA as the reference document for an expedited COFEPRIS submission. Real-world timeline compression: from 18–24 months standalone Mexico path to potentially 9–15 months total via Brazil-first. Brazil also becomes a parallel commercial market, not just a regulatory stepping stone. <strong>Week-one action: RA consultant confirms ANVISA pathway eligibility for this specific device class.</strong></p>
+          </div>
+          <div class="app-section">
+            <div class="app-section-title">Reader CAPEX — the full picture</div>
+            <p class="app-body">A quantitative reader interprets band intensity and converts it to a numerical value — required if the device outputs a concentration number. If the device outputs a semi-quantitative risk tier (Low / Elevated / High), visual reading is sufficient and reader CAPEX disappears entirely. We assume a reader-based system given the quantitative validation methodology, but the model is more favorable without one. Reader cost: $80–200 USD at small volume. Pilot fleet at 100 sites: $15–20k USD. <strong>Model: owned CAPEX from seed round (Option A), transitioning to CDMO-subsidized placement when volume justifies the negotiation (Option C).</strong> The trigger for Option C is demonstrated volume — exactly what the pilot generates. Reader fleet is a ~10% line item in the seed round allocation, corrected to reflect 100-site scale.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== APPENDIX A2: PILOT OPS =================== -->
+  <div class="slide" data-index="12">
+    <div class="s-appendix">
+      <div class="slide-eyebrow">Appendix A2 — Pilot Operations</div>
+      <div class="slide-title">What a pilot looks like.</div>
+      <div class="two-col" style="align-items:start;">
+        <div>
+          <div class="app-section">
+            <div class="app-section-title">The legal framing that makes pre-clearance pilots defensible</div>
+            <p class="app-body">COFEPRIS regulates <strong>commercial sale and distribution</strong> of medical devices. It does not explicitly prohibit using an uncleared device in a <strong>controlled clinical performance evaluation</strong> — provided it's structured correctly. This is standard global practice: EU IVDR, FDA IDE pathway, and COFEPRIS's own framework all have equivalents. You are not selling a diagnostic service. You are evaluating the device's real-world performance as part of the evidence package required for eventual clearance.<br><br><strong>The paper trail that protects you legally is identical to the paper trail that feeds your COFEPRIS submission.</strong> These are the same document set — building one builds both.</p>
+          </div>
+          <div class="app-section">
+            <div class="app-section-title">What you CAN do under clinical evaluation framing</div>
+            <p class="app-body">
+              <strong>✓ Operate with clinical oversight</strong> — a physician or licensed health professional must supervise or be formally present. TuDoc's teleconsult layer satisfies this structurally without additional hiring.<br><br>
+              <strong>✓ Collect samples and run tests</strong> under a documented evaluation protocol with documented informed consent.<br><br>
+              <strong>✓ Share results as informational, non-diagnostic findings</strong> — with mandatory language: "This is not a clinical diagnosis. Please consult a physician."<br><br>
+              <strong>✓ Document everything</strong> — batch records, consent forms, result logs, adverse event tracking. Every piece feeds the COFEPRIS submission.<br><br>
+              <strong>✓ Operate at zero cost to patient</strong> — cleanest legally, strongest for the TuDoc model. Cost absorbed as a member benefit or as evaluation operational cost.
+            </p>
+          </div>
+          <div class="app-section">
+            <div class="app-section-title">What you CANNOT do — hard lines</div>
+            <p class="app-body">
+              <strong>✗ Issue a clinical diagnosis</strong> — result language must say "elevated risk," never "you have metabolic syndrome."<br><br>
+              <strong>✗ Market as a cleared diagnostic product</strong> — no COFEPRIS seal, no equivalency claims in patient-facing materials.<br><br>
+              <strong>✗ Scale commercially without clearance</strong> — 2 pilot sites under evaluation framing is defensible. 50 retail locations is commercial distribution.<br><br>
+              <strong>✗ Make public sensitivity/specificity claims</strong> beyond what's in your formal evaluation protocol.<br><br>
+              <strong>✗ Operate without a formal ethics/oversight framework</strong> — see below.
+            </p>
+          </div>
+          <div class="app-section">
+            <div class="app-section-title">The five real risks — ranked</div>
+            <p class="app-body">
+              <strong>Risk 1 — COFEPRIS enforcement (High severity / Low-Med probability):</strong> Inspection determines you're running a commercial service without clearance. Mitigation: airtight clinical evaluation framing + documentation discipline.<br><br>
+              <strong>Risk 2 — Channel partner liability exposure (High severity / Med probability):</strong> TuDoc or pharmacy legal asks "what's our liability if a result is wrong?" Mitigation: result language + indemnification clause in partnership agreement + digital delivery creates logged consent trail.<br><br>
+              <strong>Risk 3 — Adverse event with no regulatory cover (High severity / Low probability):</strong> False negative → patient doesn't follow up → metabolic event. Mitigation: mandatory follow-up language on every result, clinical supervision, teleconsult CTA built into result delivery.<br><br>
+              <strong>Risk 4 — Patient distress from false positive (Med severity / Med probability):</strong> Unnecessary medical anxiety and cost. Mitigation: trained staff who contextualize results, immediate teleconsult pathway.<br><br>
+              <strong>Risk 5 — Pilot data rejected by COFEPRIS (Med severity / Low probability):</strong> Documentation doesn't meet technical requirements for Class II submission. Mitigation: RA consultant co-designs data collection protocol before the first test runs. Week-one investment, not optional.
+            </p>
+          </div>
+        </div>
+        <div>
+          <div class="app-section">
+            <div class="app-section-title">Ethics committee vs. full IRB — what's actually required</div>
+            <p class="app-body">Depends on where the pilot runs and how it's formally classified.<br><br>
+              <strong>Hospital-based or formally classified clinical study:</strong> Requires full Comité de Ética en Investigación (CEI/IRB) — typically 3–6 months. Not compatible with a 90-day sprint.<br><br>
+              <strong>Community-based clinical performance evaluation at non-hospital site (TuDoc, pharmacy):</strong> More flexibility. You still need a documented evaluation protocol and oversight structure — but this can be provided by an independent ethics consultant or through Tec de Monterrey's own research ethics infrastructure, which is a direct institutional asset from the spin-off's origin.<br><br>
+              <strong>The Advisory Board can formally constitute an internal oversight committee</strong> for the evaluation protocol — provided one member has clinical research credentials and is designated as protocol officer. This is the lean path. It works if documented with the same rigor as a formal IRB. Not a shortcut — a structurally appropriate mechanism for this scale and setting.<br><br>
+              <strong>Short version:</strong> Full IRB not required for TuDoc-model community evaluation. Formal ethics oversight document IS required. Advisory Board carries this. Flag as week-one action item alongside RA consultant engagement.
+            </p>
+          </div>
+          <div class="app-section">
+            <div class="app-section-title">Results delivery</div>
+            <p class="app-body">
+              <strong>Digital — co-branded result via WhatsApp or in-app notification:</strong> Risk tier (Low / Moderate / Elevated) with mandatory framing: "This indicates elevated metabolic risk. This is not a clinical diagnosis." Direct deep-link to book a TuDoc teleconsult. Digital delivery does more than inform — it creates a timestamped record that the patient received the result and was directed to follow up, which is stronger liability documentation than paper. CTA click rate and teleconsult booking rate also feed directly into LQ2 behavioral data.<br><br>
+              Secondary benefit: routes directly into TuDoc's platform and generates teleconsult bookings — pure revenue for them. Their incentive to push adoption to their member base is self-interested, not just contractual.<br><br>
+              <strong>Paper fallback:</strong> For sites without digital infrastructure. Printed card with risk tier, pre-written guidance, and TuDoc booking CTA. Simple, auditable, zero tech dependency — lower behavioral data capture, used only where digital isn't viable.
+            </p>
+          </div>
+          <div class="app-section">
+            <div class="app-section-title">Why TuDoc is the stronger pilot partner — incentive alignment</div>
+            <p class="app-body">TuDoc's business model rewards utilization. A metabolic risk screening as a "member benefit preview" does three things for them: (1) increases perceived membership value at near-zero marginal cost, (2) generates teleconsult bookings that are pure platform revenue, (3) produces health outcome data that strengthens their clinical credibility narrative.<br><br>The zero-cost-to-patient model works perfectly here — test cost is shared or absorbed as a member benefit, blended into membership pricing. For TuDoc: differentiated offering + platform utilization. For us: clinical evaluation data + behavioral follow-through data + a motivated co-promoter with an existing, warm patient base.<br><br><strong>Their incentive to push this to their members is real and self-interested — not just polite.</strong> That asymmetry is a GTM advantage you don't get in a pure pharmacy negotiation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== APPENDIX B: ASSUMPTIONS =================== -->
+  <div class="slide" data-index="13">
+    <div class="s-appendix">
+      <div class="slide-eyebrow">Appendix B — Assumptions Register</div>
+      <div class="slide-title" style="color:#e8e8e8;">Assumptions.</div>
+      <div style="margin-top:8px;">
+        <div style="display:grid;grid-template-columns:200px 1fr 80px;gap:16px;padding:8px 0;border-bottom:1px solid #1e1e1e;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#333;">Area</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#333;">Assumption</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#333;">Confidence</div>
+        </div>
+        <div class="assumption-item"><div class="ass-area">Market size</div><div class="ass-statement">~115M adults in Mexico with some degree of metabolic risk exposure (diabetes + pre-diabetes + metabolic syndrome combined, ENSANUT data)</div><div><span class="ass-confidence conf-high">High</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Target cohort</div><div class="ass-statement">Addressable pilot cohort: adults 30–55, middle-income (NSE C/C+/B), CDMX and MTY, no prior formal metabolic workup. Estimated 8–12M people.</div><div><span class="ass-confidence conf-med">Med</span></div></div>
+        <div class="assumption-item"><div class="ass-area">COGS — pilot</div><div class="ass-statement">Test strip COGS $4–6 USD at &lt;10k units/year. Based on comparable single/dual-analyte lateral flow manufacturers in LATAM/Asia CDMO landscape.</div><div><span class="ass-confidence conf-med">Med</span></div></div>
+        <div class="assumption-item"><div class="ass-area">COGS — scale</div><div class="ass-statement">Strip COGS drops to $1.50–2.50 USD at 50k+ units annually. Standard LFA cost curve for established CDMO relationships.</div><div><span class="ass-confidence conf-med">Med</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Reader CAPEX — pilot</div><div class="ass-statement">Reader hardware $80–200 USD/unit. Pilot fleet: 4 readers (2 sites × 2 units) = $320–800 USD total. Owned CAPEX in seed round (Option A), amortized 18 months.</div><div><span class="ass-confidence conf-med">Med</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Reader CAPEX — scale</div><div class="ass-statement">At 100 sites: $15–20k USD. Reader fleet becomes material working capital above 20 sites — trigger CDMO subsidy negotiation (Option C) at that point. If device is semi-quantitative (visual band only), reader CAPEX = $0.</div><div><span class="ass-confidence conf-med">Med</span></div></div>
+        <div class="assumption-item"><div class="ass-area">End-user pricing</div><div class="ass-statement">$7–12 USD (140–240 MXN) per test at middle market. Zero cost to patient under TuDoc model (absorbed as member benefit). Benchmark: TuDoc membership pricing and private preventive service comps.</div><div><span class="ass-confidence conf-med">Med</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Channel margin</div><div class="ass-statement">Pharmacy-type channel partners require 25–40% margin on end-user price. TuDoc model negotiated as shared evaluation cost, not margin-on-top — different structure, better economics for us at pilot stage.</div><div><span class="ass-confidence conf-high">High</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Pilot margin</div><div class="ass-statement">Gross margin at pilot stage is near zero or slightly negative. Intentional — pilot is a learning investment, not a revenue event.</div><div><span class="ass-confidence conf-high">High</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Seed round size</div><div class="ass-statement">$1M closes the pilot and proves the behavioral hypothesis. $2M closes the pilot, enters Brazil commercially, validates CRP as the second biomarker, and delivers a two-country data set for Series A. We're asking for the number that gets us to Series A with proof, not the number that gets us to the door and forces a bridge.</div><div><span class="ass-confidence conf-low">Low</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Seed round allocation</div><div class="ass-statement">Indicative: Pilot ops 40% · CDMO initiation 25% · Reader fleet CAPEX 10% · Regulatory / RA consultant 10% · Core team 15%.</div><div><span class="ass-confidence conf-low">Low</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Regulatory — pilot framing</div><div class="ass-statement">Pilot structured as clinical performance evaluation, not commercial service. Pre-clearance operation defensible under this framing with Advisory Board ethics oversight + Tec de Monterrey research ethics infrastructure as backstop.</div><div><span class="ass-confidence conf-med">Med</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Regulatory — clearance path</div><div class="ass-statement">Primary: COFEPRIS Class II standard route (12–24 months). Strategic: ANVISA clearance in Brazil first (6–12 months) → COFEPRIS abbreviated pathway using ANVISA as reference authority (30 business day target). Combined: potentially 9–15 months vs. 18–24 months standalone. Requires RA verification week one.</div><div><span class="ass-confidence conf-med">Med</span></div></div>
+        <div class="assumption-item"><div class="ass-area">COFEPRIS device class</div><div class="ass-statement">Assumed Class II IVD. Actual classification requires formal COFEPRIS assessment — could shift based on specific claims and biomarkers. Class III would materially extend timeline and cost.</div><div><span class="ass-confidence conf-med">Med</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Ethics oversight</div><div class="ass-statement">Advisory Board constitutes internal ethics oversight committee for clinical evaluation protocol. One member designated protocol officer. Full IRB not required for community-based non-hospital evaluation. Tec de Monterrey ethics infrastructure available as institutional backstop.</div><div><span class="ass-confidence conf-med">Med</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Results delivery</div><div class="ass-statement">Digital co-branded result via WhatsApp or in-app (primary) with deep-link to TuDoc teleconsult. Paper fallback for sites without digital infrastructure. Digital delivery provides stronger liability documentation and cleaner behavioral data.</div><div><span class="ass-confidence conf-med">Med</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Pull-through traffic</div><div class="ass-statement">&gt;30% of pilot traffic generated through demand seeding (micro-influencer + WhatsApp activation) rather than pure channel foot traffic.</div><div><span class="ass-confidence conf-low">Low</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Patient follow-through</div><div class="ass-statement">&gt;40% of patients who receive a risk flag take a follow-up care action within 14 days. TuDoc model improves this number vs. standalone pharmacy given integrated teleconsult pathway.</div><div><span class="ass-confidence conf-low">Low</span></div></div>
+        <div class="assumption-item"><div class="ass-area">Series A trigger</div><div class="ass-statement">500+ real-world cases + 2 renewed channel partners + documented COFEPRIS or ANVISA clearance path = credible Series A narrative. Timing: 18–24 months post-seed.</div><div><span class="ass-confidence conf-med">Med</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== APPENDIX C: Q&A PREP =================== -->
+  <div class="slide" data-index="14">
+    <div class="s-appendix">
+      <div class="slide-eyebrow">Appendix C — Q&amp;A</div>
+      <div class="slide-title">Questions worth having answers to.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;margin-top:4px;">
+        <div>
+
+          <div style="margin-bottom:20px;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;padding-bottom:6px;border-bottom:1px solid var(--rule);">Regulatory</div>
+
+            <div class="qa-item">
+              <div class="qa-q">How do you operate before COFEPRIS clearance?</div>
+              <div class="qa-a">The pilot is structured as a clinical performance evaluation, not a commercial service. That framing is standard pre-clearance practice globally. The documentation we generate is the same evidence package the COFEPRIS submission requires — we're feeding it, not going around it. The Advisory Board handles ethics oversight. TuDoc's clinical layer provides physician supervision without additional hiring.</div>
+            </div>
+
+            <div class="qa-item">
+              <div class="qa-q">Does the Advisory Board actually cover ethics oversight — or do you need a full IRB?</div>
+              <div class="qa-a">A full hospital IRB is required for formally classified clinical studies — 3 to 6 months, incompatible with a 90-day sprint. For a community-based performance evaluation at a non-hospital site like TuDoc, the Advisory Board can formally constitute an internal oversight committee provided one member has clinical research credentials and is designated protocol officer. The RA consultant co-designs the protocol before the first test runs. It's not a shortcut — it's the appropriate mechanism for this setting.</div>
+            </div>
+
+            <div class="qa-item">
+              <div class="qa-q">How are results delivered, and what's your liability exposure?</div>
+              <div class="qa-a">Digital, co-branded with TuDoc via WhatsApp or in-app, with mandatory language: "This indicates elevated metabolic risk. This is not a clinical diagnosis." Digital delivery is actually stronger liability protection than paper — timestamped evidence the patient received the result and was directed to follow up, plus a CTA click log. The consent form signed before the test does significant work on top of that.</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;padding-bottom:6px;border-bottom:1px solid var(--rule);">Brazil strategy</div>
+
+            <div class="qa-item">
+              <div class="qa-q">Does the Brazil-first regulatory path actually work — and what breaks it?</div>
+              <div class="qa-a">It works under one critical condition: the device classifies as Class II in Brazil. At Class II, ANVISA uses the Notificação route — simplified, no review queue, potentially months not years. Once notified, COFEPRIS's abbreviated pathway accepts ANVISA as reference authority, 30 business day target. Total: potentially 9 to 12 months dual-market vs. 18 to 24 standalone. What breaks it: Class III classification because of how quantitative metabolic claims are framed. The speed argument collapses entirely. Week-one action is an RA consultant confirming device class for this specific product and intended use. Everything downstream depends on that answer.</div>
+            </div>
+
+            <div class="qa-item">
+              <div class="qa-q">For a Brazil-native investor — why is this their story?</div>
+              <div class="qa-a">Because the ANVISA-COFEPRIS bridge inverts the sequence. This isn't a Mexico company adding Brazil in year three. It's a company that enters Brazil first as part of its clearance strategy, with Mexico following in 30 business days. A Brazil-native investor anchors in their home market and gets Mexico as a near-immediate follow-on rather than a speculative expansion. That's a home-market story, not an international bet.</div>
+            </div>
+
+            <div class="qa-item">
+              <div class="qa-q">Your pilot is in Mexico — does that validate the Brazil market?</div>
+              <div class="qa-a">Not directly. Brazil and Mexico have real structural differences — universal public healthcare through SUS, different pharmacy culture, different patient navigation. A Mexico pilot doesn't prove Brazil GTM. What it does prove is the behavioral hypothesis: that making metabolic risk visible at point of care changes what urban middle-class patients do next. That hypothesis travels. What doesn't travel is a copy-paste GTM — Brazil needs its own pilot and its own partners. What Series A capital funds is exactly that proof.</div>
+            </div>
+          </div>
+
+        </div>
+        <div>
+
+          <div style="margin-bottom:20px;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;padding-bottom:6px;border-bottom:1px solid var(--rule);">Commercial model</div>
+
+            <div class="qa-item">
+              <div class="qa-q">Why membership and primary care clinics — and not pharmacy chains or DTC?</div>
+              <div class="qa-a">Membership networks and primary care clinics give us three things pharmacies and DTC can't: a patient who already has a follow-up pathway, a partner whose business model rewards utilization, and a closed behavioral loop we can actually measure. Pharmacy volume is real — we use it for awareness — but the data trail ends at the door. DTC works when you have a brand and content engine. We have neither yet. When we have real patient stories and published results, DTC is a Phase 2 play.</div>
+            </div>
+
+            <div class="qa-item">
+              <div class="qa-q">What structural advantages does this test have over existing options?</div>
+              <div class="qa-a">The comparison isn't really against ELISA — it's against doing nothing, which is the actual competitor. ELISA is excellent for what it does: centralized lab, controlled conditions, full panel. It's also inaccessible to the population we're targeting. Our validation is benchmarked against ELISA as the reference standard — required by COFEPRIS and ANVISA. The clinical question isn't "is this as good as ELISA?" It's "is this good enough to flag elevated risk in a way that changes what the patient does next?" Those are different questions. ELISA is the destination. We're the access layer that routes people toward it.</div>
+            </div>
+
+            <div class="qa-item">
+              <div class="qa-q">Walk me through reader CAPEX in the seed round.</div>
+              <div class="qa-a">Pilot fleet is 4 readers across 2 sites at $80 to $200 USD each — $320 to $800 total, small. At 100 sites it's $15 to $20k in placed hardware — real working capital. The plan is owned CAPEX from seed now, then transition to CDMO-subsidized placement once demonstrated throughput justifies the negotiation. The pilot generates exactly that data. And if the device runs semi-quantitative visual mode, reader CAPEX is zero.</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;padding-bottom:6px;border-bottom:1px solid var(--rule);">Capital &amp; risk</div>
+
+            <div class="qa-item">
+              <div class="qa-q">Pilot margin is near zero — how do you survive 18 months on that?</div>
+              <div class="qa-a">The seed round funds the learning period explicitly. Margin turns at medium volume — the CDMO relationship and reader amortization are the levers, and both require scale we can only justify with pilot data. We're not projecting margin at pilot stage. We're earning the right to project it at the next investor conversation.</div>
+            </div>
+
+            <div class="qa-item">
+              <div class="qa-q">What would make you step back and reassess the entire model?</div>
+              <div class="qa-a">If the 90-day pilot shows that patients receive a risk result and consistently don't act on it within 14 days. That's the behavioral hypothesis the entire model depends on — not the technology, not the regulatory path, not the margin structure. If the test doesn't change what someone does next, we're building something interesting that doesn't create real health outcomes. I'd rather know that at week 12 than month 24.</div>
+            </div>
+
+            <div class="qa-item">
+              <div class="qa-q">How do you think about full-time transition?</div>
+              <div class="qa-a">Transition should be milestone-triggered, not calendar-triggered. First real traction signal — signed pilot agreement, committed channel partner, or seed close — is the right trigger. I'd want that explicit and agreed upfront. Ambiguity there creates misaligned expectations on both sides, and I'd rather surface that now than manage it under pressure.</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- CONTROLS -->
+<button id="prev" onclick="changeSlide(-1)">← prev</button>
+<button id="next" onclick="changeSlide(1)">next →</button>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const totalSlides = slides.length;
+  const mainSlides = 11;
+  let current = 0;
+
+  const dotsContainer = document.getElementById('nav-dots');
+  const counter = document.getElementById('slide-counter');
+
+  for (let i = 0; i < totalSlides; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (i >= mainSlides ? ' appendix' : '') + (i === 0 ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    dotsContainer.appendChild(dot);
+  }
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    dotsContainer.children[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, totalSlides - 1));
+    slides[current].classList.add('active');
+    dotsContainer.children[current].classList.add('active');
+    const label = current >= mainSlides ? `A${current - mainSlides + 1} / ${totalSlides - mainSlides}` : `${String(current + 1).padStart(2,'0')} / ${mainSlides}`;
+    counter.textContent = label;
+  }
+
+  function changeSlide(dir) { goTo(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+  });
+
+  // PASSWORD GATE
+  (function() {
+    const PASS = 'Prelu2026';
+    const gate = document.getElementById('gate');
+    const inp  = document.getElementById('gate-input');
+    const btn  = document.getElementById('gate-btn');
+    const err  = document.getElementById('gate-error');
+
+    function tryUnlock() {
+      if (inp.value === PASS) {
+        gate.style.transition = 'opacity 0.4s ease';
+        gate.style.opacity = '0';
+        setTimeout(() => gate.remove(), 420);
+      } else {
+        err.style.display = 'block';
+        inp.classList.add('error');
+        inp.value = '';
+        setTimeout(() => inp.classList.remove('error'), 400);
+        inp.focus();
+      }
+    }
+
+    btn.addEventListener('click', tryUnlock);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+    // Autofocus after fonts load
+    window.addEventListener('load', () => inp.focus());
+  })();
+
+</script>
+</body>
+</html>
